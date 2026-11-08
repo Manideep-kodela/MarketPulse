@@ -1,11 +1,11 @@
 
-name: Build MarketPulse Android APK
+name: Build MarketPulse Complete Release
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'MarketPulseAndroid_FreeData_Starter.zip'
+      - 'MarketPulseAndroid_Complete_Release.zip'
       - '.github/workflows/android.yml'
 
 jobs:
@@ -16,8 +16,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract project
-        run: unzip -q MarketPulseAndroid_FreeData_Starter.zip
+      - name: Extract complete project
+        run: |
+          unzip -q MarketPulseAndroid_Complete_Release.zip
+          ls -la MarketPulseAndroid
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -28,70 +30,25 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: |
-            platform-tools
+          packages: platform-tools
           accept-android-sdk-licenses: true
 
-      - name: Install required SDK packages
+      - name: Install Android SDK packages
         run: |
           sdkmanager "platforms;android-35" "build-tools;35.0.0"
-
-      - name: Fix Java and Kotlin targets
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path("MarketPulseAndroid/android/app/build.gradle.kts")
-          content = path.read_text()
-
-          old = "    buildFeatures { compose = true }"
-          new = """    compileOptions {
-              sourceCompatibility = JavaVersion.VERSION_17
-              targetCompatibility = JavaVersion.VERSION_17
-          }
-          kotlinOptions {
-              jvmTarget = "17"
-          }
-          buildFeatures { compose = true }"""
-
-          if old not in content:
-              raise SystemExit("Could not find expected Gradle configuration")
-
-          path.write_text(content.replace(old, new, 1))
-          print("Java and Kotlin targets updated to 17")
-          PY
-
-          
-      - name: Fix Material3 experimental API
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path("MarketPulseAndroid/android/app/src/main/java/com/marketpulse/app/MainActivity.kt")
-          content = path.read_text()
-
-          old = "@Composable\nprivate fun MarketPulseScreen()"
-          new = "@OptIn(ExperimentalMaterial3Api::class)\n@Composable\nprivate fun MarketPulseScreen()"
-
-          if old not in content:
-              raise SystemExit("Could not find MarketPulseScreen declaration")
-
-          path.write_text(content.replace(old, new, 1))
-          print("Material3 API opt-in added")
-          PY
-          
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
-      - name: Build debug APK
+      - name: Build complete APK
         working-directory: MarketPulseAndroid/android
         run: gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: MarketPulse-debug-APK
+          name: MarketPulse-Complete-APK
           path: MarketPulseAndroid/android/app/build/outputs/apk/debug/app-debug.apk
+          
