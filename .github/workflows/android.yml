@@ -35,7 +35,31 @@ jobs:
       - name: Install required SDK packages
         run: |
           sdkmanager "platforms;android-35" "build-tools;35.0.0"
-          sdkmanager --list_installed
+
+      - name: Fix Java and Kotlin targets
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("MarketPulseAndroid/android/app/build.gradle.kts")
+          content = path.read_text()
+
+          old = "    buildFeatures { compose = true }"
+          new = """    compileOptions {
+              sourceCompatibility = JavaVersion.VERSION_17
+              targetCompatibility = JavaVersion.VERSION_17
+          }
+          kotlinOptions {
+              jvmTarget = "17"
+          }
+          buildFeatures { compose = true }"""
+
+          if old not in content:
+              raise SystemExit("Could not find expected Gradle configuration")
+
+          path.write_text(content.replace(old, new, 1))
+          print("Java and Kotlin targets updated to 17")
+          PY
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
