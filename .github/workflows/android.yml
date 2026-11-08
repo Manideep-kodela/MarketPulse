@@ -61,6 +61,26 @@ jobs:
           print("Java and Kotlin targets updated to 17")
           PY
 
+          
+      - name: Fix Material3 experimental API
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("MarketPulseAndroid/android/app/src/main/java/com/marketpulse/app/MainActivity.kt")
+          content = path.read_text()
+
+          old = "@Composable\nprivate fun MarketPulseScreen()"
+          new = "@OptIn(ExperimentalMaterial3Api::class)\n@Composable\nprivate fun MarketPulseScreen()"
+
+          if old not in content:
+              raise SystemExit("Could not find MarketPulseScreen declaration")
+
+          path.write_text(content.replace(old, new, 1))
+          print("Material3 API opt-in added")
+          PY
+          
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
