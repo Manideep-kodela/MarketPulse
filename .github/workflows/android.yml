@@ -25,11 +25,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      
       - name: Check Android SDK
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME"
-          which sdkmanager
-          sdkmanager --version
+          ls -la "$ANDROID_HOME/cmdline-tools" || true
+          find "$ANDROID_HOME" -name sdkmanager -type f || true
+          ls -la "$ANDROID_HOME/platforms" || true
+
 
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses || true
