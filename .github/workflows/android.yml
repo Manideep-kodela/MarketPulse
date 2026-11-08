@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'MarketPulseAndroid_Starter.zip'
+      - 'MarketPulseAndroid_FreeData_Starter.zip'
       - '.github/workflows/android.yml'
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Extract project
-        run: unzip -q MarketPulseAndroid_Starter.zip
+        run: unzip -q MarketPulseAndroid_FreeData_Start
 
       - name: Set up Java
         uses: actions/setup-java@v4
